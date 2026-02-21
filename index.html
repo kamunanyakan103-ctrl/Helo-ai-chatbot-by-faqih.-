@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Groq AI - Llama 3.1</title>
+<style>
+body{
+  font-family: Arial;
+  background:#0f172a;
+  color:white;
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+  margin:0;
+}
+#chat{
+  flex:1;
+  padding:15px;
+  overflow-y:auto;
+}
+.msg{
+  margin:8px 0;
+  padding:10px;
+  border-radius:10px;
+}
+.user{
+  background:#1e293b;
+}
+.bot{
+  background:#334155;
+}
+input{
+  padding:12px;
+  border:none;
+  width:80%;
+  border-radius:8px;
+}
+button{
+  padding:12px;
+  border:none;
+  background:#22c55e;
+  color:white;
+  border-radius:8px;
+}
+</style>
+</head>
+<body>
+
+<div id="chat"></div>
+
+<div style="display:flex; gap:5px; padding:10px;">
+<input type="text" id="input" placeholder="Tulis pesan...">
+<button onclick="kirim()">Kirim</button>
+</div>
+
+<script>
+const API_KEY = "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"; // <-- GANTI INI
+
+async function kirim(){
+  const input = document.getElementById("input");
+  const chat = document.getElementById("chat");
+  const pesan = input.value;
+  if(!pesan) return;
+
+  chat.innerHTML += `<div class="msg user">Kamu: ${pesan}</div>`;
+  input.value="";
+
+  try{
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer " + API_KEY
+      },
+      body: JSON.stringify({
+        model:"llama-3.1-8b-instant",
+        messages:[
+          {role:"user", content:pesan}
+        ]
+      })
+    });
+
+    const data = await response.json();
+    console.log(data);
+
+    if(data.error){
+      chat.innerHTML += `<div class="msg bot">Error: ${data.error.message}</div>`;
+    }else{
+      chat.innerHTML += `<div class="msg bot">AI: ${data.choices[0].message.content}</div>`;
+    }
+
+    chat.scrollTop = chat.scrollHeight;
+
+  }catch(err){
+    chat.innerHTML += `<div class="msg bot">Error koneksi!</div>`;
+  }
+}
+</script>
+
+</body>
+</html>
